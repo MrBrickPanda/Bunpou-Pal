@@ -345,4 +345,3 @@ class JPStemmer:
 def stemming(w):
     stem = JPStemmer()
     return stem.stemmer(w)
-print(stemming('食べなかった'))
