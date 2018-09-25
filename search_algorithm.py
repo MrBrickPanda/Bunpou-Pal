@@ -9,7 +9,7 @@ class Search:
         self.word_parts = []
         self.keb = False
         self.rebs = ''
-        self.conn = sqlite3.connect('betterjm2.db')
+        self.conn = sqlite3.connect('jmd.db')
         self.c = self.conn.cursor()
 
 
@@ -67,5 +67,3 @@ def isWord(word):
 def wordResults(word):
     finder = Search()
     return finder.getSense(word)
-
-# 食べる
