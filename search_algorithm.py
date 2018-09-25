@@ -1,7 +1,7 @@
 import sqlite3
 import codecs
 import re
-from Project_Files_Asher_Perkins.jpstemmer import stemming
+from jpstemmer import stemming
 
 class Search:
     def __init__(self):
