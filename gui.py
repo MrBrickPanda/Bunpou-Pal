@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
-from search_algorithm import wordResults
+from search_algorithm2 import wordResults
+from search_algorithm2 import getKanji
 import MeCab
 from timeit import default_timer as timer
 from  tokenise import parseSentence
@@ -17,7 +18,7 @@ class TestingThing(Tk):
         self.frames = {}
         self.title("Bunpou Pal")
 
-        for F in (Menu, Dict, Gramm):
+        for F in (Menu, Dict, Gramm, Rads):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -26,10 +27,10 @@ class TestingThing(Tk):
     
     def show_frame(self, cont):
         frame = self.frames[cont]
-        if 'dict' or 'gramm' in str(frame):
+        if 'dict' in str(frame) or 'gramm' in str(frame):
             self.geometry("400x255")
         else:
-            self.geometry("200x100")
+            self.geometry("200x150")
         frame.tkraise()
 
 class Menu(Frame):
@@ -43,12 +44,16 @@ class Menu(Frame):
         button1.pack()
         button2 = ttk.Button(self, text="Visit Grammar Explaniner", command=lambda: controller.show_frame(Gramm))
         button2.pack()
+        button3 = ttk.Button(self, text="Visit Kanji Search by Radical", command=lambda: controller.show_frame(Rads))
+        button3.pack()
+# for i in range (all the things):
+#     square = Square(xcoord * 1 + i, ycoord etc, image = allthethings[i.image])
+#     display(square)
 
 class Dict(Frame):
     def __init__(self, parent, controller):
         # Creates various buttons and labels
         Frame.__init__(self, parent)
-
         self.x = StringVar()
         self.label_1 = Label(self, text="Enter a Word", bg="#333333", fg="white")
         self.entry_1 = Entry(self, textvariable=self.x, width=50)
@@ -64,16 +69,23 @@ class Dict(Frame):
     # Function that outputs the search results to the GUI window.
     def outputWord(self, x):
         self.output.delete(0.0, END)
-        if x == '':
-            self.output.insert(END, 'Please Input a Word')
-        else:
-            if not wordResults(x):
+        if x != '':
+            senseParts = wordResults(x)
+            if not senseParts:
                 # Returns if the word wasn't found in JMdict
                 self.output.insert(END, "This search didn't return anything!")
             else:
-                for i in wordResults(x):
-                    # Strip the result of things that get in the way of readability
-                    self.output.insert(END, str(i).strip("[]").strip("}{").replace("'", "") + "\n")
+                meanings = 1
+                for i in senseParts:
+                    self.output.insert(END, 'Meaning ' + str(meanings) + '\n')
+                    meanings += 1
+                    for p in i:
+                        self.output.insert(END, str(p))
+                    self.output.insert(END, '\n')
+
+        else:
+            self.output.insert(END, 'Please Input a Word')
+            # .strip("[]").strip("}{").replace("'", "").replace('"[', '').replace(']"', '')
 
 class Gramm(Frame):
     def __init__(self, parent, controller):
@@ -85,9 +97,48 @@ class Gramm(Frame):
         self.entry_1 = Entry(self, textvariable=self.x, width=50)
         self.label_1.grid(row=3, sticky=EW)
         self.entry_1.grid(row=4, column=0, sticky=EW)
-        self.but = ttk.Button(self, text="Parse", command=lambda : parseSentence(self.x.get()))  # Note the use of lambda and the x and y variables.
+        self.but = ttk.Button(self, text="Parse", command=lambda : self.showWords(self.x.get()))  # Note the use of lambda and the x and y variables.
         self.but.grid(row=5, column=0, sticky=EW)
+        self.output = Text(self, width = 50, height = 10, wrap = WORD, background = "white")
+        self.output.grid(row=6, column=0, sticky = W)
 
+    def showWords(self, word):
+        self.output.delete(0.0, END)
+        wordParts = parseSentence(word)
+        if word == '':
+            self.output.insert(END, 'Please Input a Word')
+        else:
+            if not wordParts:
+                # Returns if the word wasn't found in JMdict
+                self.output.insert(END, "This search didn't return anything!")
+            else:
+                wordCount = 1
+                for i in wordParts:
+                    self.output.insert(END, 'Word '+str(wordCount)+'\n')
+                    wordCount+=1
+                    for x in i:
+                        for p in x:
+                            self.output.insert(END, p)
+                        self.output.insert(END, '\n')
+                 
+class Rads(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        button1 = ttk.Button(self, text="Back to Home", command=lambda: controller.show_frame(Menu))
+        button1.grid(row=7, column=0, sticky=EW)
+        self.buttons = []
+        rads = getKanji()
+        #import all rads and store them in list "rads"
+        row = 8
+        column = 0
+        for rad in rads:
+            self.buttons.append(ttk.Button(self, text=rad[0], command=lambda: controller.show_frame(Menu)))
+            self.buttons[-1].grid(row=row, column=column, sticky=EW)
+            column +=1
+            if column == 10:
+                column = 0
+                row += 1
+            
 
 app = TestingThing()
 app.mainloop()
