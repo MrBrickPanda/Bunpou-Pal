@@ -13,7 +13,9 @@ def getToken(sentence):
 # This function assumes that the longest match in a string is the correct word.
 def parseSentence(sentence):
     partsOfSent = []
+    print(getToken(sentence)[:-1])
     tokenised = getToken(sentence)
+    # 捕鯨が好きです
     for token in tokenised:
         tokenIter = tokenised
         # Combines all the morphemes and searches JMdict for the combination
